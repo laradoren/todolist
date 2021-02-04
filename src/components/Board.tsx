@@ -1,14 +1,14 @@
-import React, { FC} from 'react';
-import { makeStyles, Theme, createStyles } from '@material-ui/core/styles';
-import {ToDoCard} from "../Card";
-import {ModalWindow} from "../ModalWindow";
+import React, {FC} from "react";
+import { makeStyles, Theme, createStyles } from "@material-ui/core/styles";
+import {ToDoCard} from "./Card";
+import {ModalWindow} from "./ModalWindow";
 import {useDispatch} from "react-redux";
-import {addNewCard, setFields, deleteCard, updateCard} from "../../redux/boardReducer";
+import {addNewCard, setFields, deleteCard} from "../redux/actions";
 
 const useStyles = makeStyles((theme: Theme) =>
     createStyles({
         container: {
-            padding: " 30px 50px",
+            padding: "30px 50px",
             minHeight: "calc(100vh - 209px)",
             display: "grid",
             gridTemplateColumns: "repeat(4, 1fr)",
@@ -29,16 +29,14 @@ const useStyles = makeStyles((theme: Theme) =>
 interface BoardProps {
     darkTheme: boolean,
     openModal: boolean,
-    handleCloseModal: any,
-    cards: any,
-    title: string,
-    text: string
+    handleCloseModal: () => void,
+    state: any,
 }
 
-export const Board:FC<BoardProps> = ({darkTheme, cards, title, text, openModal, handleCloseModal}) => {
+export const Board:FC<BoardProps> = ({ darkTheme, state, openModal, handleCloseModal}) => {
     const classes = useStyles();
-
     const dispatch = useDispatch();
+    const {cards, title, text, notes, move, note} = state;
 
     const onChange = (e: any) => {
         const {name, value} = e.target;
@@ -49,10 +47,9 @@ export const Board:FC<BoardProps> = ({darkTheme, cards, title, text, openModal, 
         e.preventDefault();
         const formData = new FormData;
         let id = cards.length + 1;
-        formData.append('id', id);
-        formData.append('title', title);
-        formData.append('text', text);
-
+        formData.append("id", id);
+        formData.append("title", title);
+        formData.append("text", text);
         dispatch(addNewCard(formData));
         dispatch(setFields({name: "title", value: ""}));
         dispatch(setFields({name: "text", value: ""}));
@@ -65,13 +62,11 @@ export const Board:FC<BoardProps> = ({darkTheme, cards, title, text, openModal, 
 
     return (
         <div className={(darkTheme) ? classes.darkColor : classes.container}>
-            {cards.map((c:any) => <ToDoCard
-                                    key={c} id={c.id}
-                                    titleCard={c.title} textCard={c.text}
-                                    title={title} text={text}
-                                    deleteCard = {onClickDelete}
-                                    onFieldChange={onChange}/>)}
-            <ModalWindow openModal={openModal} handleCloseModal={handleCloseModal} onFieldChange={onChange} onFormSubmit={onFormSubmit} />
+            {cards.map((c:any) => <ToDoCard note = {note} notes={notes} key={c} id={c.id} move={move}
+                                            titleCard={c.title} textCard={c.text} title={title} text={text}
+                                            deleteCard = {onClickDelete} onFieldChange={onChange}/>)}
+            <ModalWindow isNotes={false} openModal={openModal} handleCloseModal={handleCloseModal}
+                                         onFieldChange={onChange} onFormSubmit={onFormSubmit} />
         </div>
     );
 }
